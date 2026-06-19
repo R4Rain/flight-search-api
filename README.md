@@ -4,6 +4,36 @@ Go HTTP API that aggregates flight data from 4 airline providers, normalizes inc
 
 ---
 
+## Features Implemented
+
+### Core Functionalities
+
+| Feature | Status | Details |
+|---|---|---|
+| Aggregate from multiple providers | ✅ | 4 providers (Garuda, Lion Air, Batik Air, AirAsia) queried in parallel |
+| Normalize different data formats | ✅ | Each provider's unique JSON → unified Flight struct |
+| Search by origin, destination, date | ✅ | IATA codes, YYYY-MM-DD format |
+| Filter results | ✅ | Price range, stops, airlines, departure/arrival time, duration |
+| Sort results | ✅ | Price, duration, departure, arrival, best value |
+| Price comparison across providers | ✅ | All prices normalized to IDR, sortable |
+| Handle data inconsistencies | ✅ | Timezone differences, missing fields, incorrect stop counts |
+| Validate flight data | ✅ | Arrival must be after departure, invalid flights skipped |
+
+### Bonus Features
+
+| Feature | Status | Details |
+|---|---|---|
+| Best-value scoring algorithm | ✅ | Weighted formula: 60% price + 30% duration + 10% stops |
+| Round-trip searches | ✅ | Separate outbound/return arrays, parallel leg search |
+| Multi-city searches | ✅ | 2–6 segments, chronological date validation, per-segment results |
+| Timezone handling (WIB, WITA, WIT) | ✅ | IANA timezone parsing for Lion Air, offset parsing for Batik Air |
+| Rate limiting | ✅ | Per-IP token bucket with idle visitor eviction |
+| Retry with exponential backoff | ✅ | AirAsia: 3 retries, 100ms/200ms/400ms backoff |
+| IDR currency formatting | ✅ | Displayed as `Rp 1.250.000` with dot separators |
+| Parallel provider queries with timeout | ✅ | Goroutines with `context.WithTimeout`, partial results on failure |
+
+---
+
 ## Solution Design
 
 1. Client sends search request.
@@ -311,36 +341,6 @@ Tested locally:
 
 - Cached responses are **~5× faster**, only filter/sort overhead remains
 - Round-trip cold is faster than one-way when outbound leg was already cached
-
----
-
-## Features Implemented
-
-### Core Functionalities
-
-| Feature | Status | Details |
-|---|---|---|
-| Aggregate from multiple providers | ✅ | 4 providers (Garuda, Lion Air, Batik Air, AirAsia) queried in parallel |
-| Normalize different data formats | ✅ | Each provider's unique JSON → unified Flight struct |
-| Search by origin, destination, date | ✅ | IATA codes, YYYY-MM-DD format |
-| Filter results | ✅ | Price range, stops, airlines, departure/arrival time, duration |
-| Sort results | ✅ | Price, duration, departure, arrival, best value |
-| Price comparison across providers | ✅ | All prices normalized to IDR, sortable |
-| Handle data inconsistencies | ✅ | Timezone differences, missing fields, incorrect stop counts |
-| Validate flight data | ✅ | Arrival must be after departure, invalid flights skipped |
-
-### Bonus Features
-
-| Feature | Status | Details |
-|---|---|---|
-| Best-value scoring algorithm | ✅ | Weighted formula: 60% price + 30% duration + 10% stops |
-| Round-trip searches | ✅ | Separate outbound/return arrays, parallel leg search |
-| Multi-city searches | ✅ | 2–6 segments, chronological date validation, per-segment results |
-| Timezone handling (WIB, WITA, WIT) | ✅ | IANA timezone parsing for Lion Air, offset parsing for Batik Air |
-| Rate limiting | ✅ | Per-IP token bucket with idle visitor eviction |
-| Retry with exponential backoff | ✅ | AirAsia: 3 retries, 100ms/200ms/400ms backoff |
-| IDR currency formatting | ✅ | Displayed as `Rp 1.250.000` with dot separators |
-| Parallel provider queries with timeout | ✅ | Goroutines with `context.WithTimeout`, partial results on failure |
 
 ---
 
